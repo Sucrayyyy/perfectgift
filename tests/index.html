@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PerfectGift — tests</title>
+  <style>
+    body { font: 15px/1.5 -apple-system, system-ui, sans-serif; margin: 24px; color: #1F1631; background: #FBF6EF; }
+    h1 { font-size: 22px; }
+    li { list-style: none; padding: 4px 0; }
+    .ok { color: #1C8A6E; } .ko { color: #C2285F; }
+    small { display: block; color: #5E5470; margin-left: 22px; }
+  </style>
+</head>
+<body>
+  <h1>Tests PerfectGift</h1>
+  <p id="summary">Exécution…</p>
+  <ul id="list"></ul>
+  <script type="module">
+    import './specs.js';
+    import { getResults } from './harness.js';
+    const results = getResults();
+    const failed = results.filter((r) => !r.ok);
+    document.getElementById('summary').textContent = `${results.length - failed.length}/${results.length} tests réussis`;
+    document.getElementById('list').innerHTML = results.map((r) =>
+      `<li class="${r.ok ? 'ok' : 'ko'}">${r.ok ? '✓' : '✗'} ${r.label}${r.ok ? '' : `<small>${r.error}</small>`}</li>`).join('');
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Copiez en wrangler.toml puis : npm install && npx wrangler deploy
+name = "perfectgift-api"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Origines autorisées à appeler l'API (votre site GitHub Pages)
+ALLOWED_ORIGINS = "https://VOTRE-COMPTE.github.io"
+
+# Secrets — à définir avec `npx wrangler secret put NOM`, jamais dans ce fichier :
+#   SERPAPI_KEY          offres Google Shopping (prix, vendeur, image, lien)
+#   ANTHROPIC_API_KEY    analyse du texte libre (facultatif)
+#   AMAZON_PARTNER_TAG   identifiant Partenaires Amazon (facultatif)
+#   AWIN_PUBLISHER_ID    identifiant éditeur Awin (facultatif)
+#   AWIN_MERCHANTS       JSON {"fnac.com": "12345", ...} (facultatif)

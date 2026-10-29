@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8F5E"/><stop offset=".5" stop-color="#E9483A"/><stop offset="1" stop-color="#B5205A"/></linearGradient>
+  <radialGradient id="glow" cx=".25" cy=".18" r=".75"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+  <linearGradient id="rib" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0533F"/><stop offset="1" stop-color="#C2285F"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE7A6"/><stop offset=".5" stop-color="#F7BE4D"/><stop offset="1" stop-color="#E39A1E"/></linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/>
+<g>
+  <ellipse cx="512" cy="842" rx="250" ry="26" fill="#5A0F2E" opacity=".22"/>
+  <rect x="272" y="470" width="480" height="356" rx="72" fill="#FFF6EC"/>
+  <rect x="272" y="488" width="480" height="24" fill="#2B1846" opacity=".08"/>
+  <rect x="232" y="378" width="560" height="124" rx="60" fill="#FFFFFF"/>
+  <rect x="472" y="378" width="80" height="448" fill="url(#rib)"/>
+  <path d="M512 140C522.98 187.57999999999998 586.42 251.02 634 262C586.42 272.98 522.98 336.42 512 384C501.02 336.42 437.58 272.98 390 262C437.58 251.02 501.02 187.57999999999998 512 140Z" fill="url(#gold)"/>
+  <path d="M486 210C487.98 218.58 499.42 230.02 508 232C499.42 233.98 487.98 245.42 486 254C484.02 245.42 472.58 233.98 464 232C472.58 230.02 484.02 218.58 486 210Z" fill="#FFFFFF" opacity=".7"/>
+  <path d="M226 216C229.06 229.26 246.74 246.94 260 250C246.74 253.06 229.06 270.74 226 284C222.94 270.74 205.26 253.06 192 250C205.26 246.94 222.94 229.26 226 216Z" fill="#FFFFFF" opacity=".85"/>
+  <path d="M812 294C814.16 303.36 826.64 315.84 836 318C826.64 320.16 814.16 332.64 812 342C809.84 332.64 797.36 320.16 788 318C797.36 315.84 809.84 303.36 812 294Z" fill="#FFFFFF" opacity=".75"/>
+</g></svg>
