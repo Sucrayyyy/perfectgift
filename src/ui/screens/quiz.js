@@ -76,7 +76,7 @@ export function QuizScreen() {
     return h('div', { class: 'quiz__head' },
       interest
         ? h('div', { class: 'interest-head' },
-          h('span', { class: 'interest-head__emoji', style: { background: interest.hue[1] } }, interest.e),
+          h('span', { class: 'interest-head__icon', style: { background: interest.hue[1] }, html: iconSvg(interest.id, 1.7) }),
           h('span', { class: 'eyebrow' }, `${step.section} · ${interest.l}`))
         : h('span', { class: 'eyebrow quiz__eyebrow' }, h('span', { class: 'dot' }), step.section),
       h('h1', { class: 'display' }, frenchSpacing(resolve(step.title, answers))),

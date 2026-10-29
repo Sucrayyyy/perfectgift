@@ -95,4 +95,6 @@ Icônes et écrans de lancement : `swift scripts/render-icons.swift <svg> <png> 
 
 ## Direction artistique
 
-« Papier & Ruban » : papier crème, encre prune, ruban vermillon et étoile dorée. Le symbole est un cadeau dont le nœud est une étoile. Typographies **Fraunces** (titres) et **Plus Jakarta Sans** (interface). Motion : entrées « déballage » (montée et flou qui se dissipe), ressorts doux sur les sélections, boîte qui tremble puis s'ouvre pendant la recherche, confettis à l'arrivée des résultats, transitions de pages natives. Tout respecte le réglage iOS « Réduire les animations ».
+« Papier & Ruban » : papier crème, encre prune, ruban vermillon et étoile dorée. Le symbole est un cadeau dont le nœud est une étoile. Tout le visuel est dessiné pour l'app, sans emoji : un jeu d'icônes au trait (passions, occasions, types de cadeaux, objets) et des illustrations de cartes en forme de paquet, l'objet de l'idée au centre du nœud.
+
+Typographies : **Bricolage Grotesque** pour les titres (sérieuse mais pas austère) et **Figtree** pour le texte. Motion : entrées « déballage », ressorts doux sur les sélections, boîte qui tremble puis s'ouvre pendant la recherche, transitions de pages natives. Tout respecte le réglage iOS « Réduire les animations ».

@@ -36,11 +36,11 @@ export function SearchingScreen() {
     'Dernières finitions… et un joli ruban.',
   ];
 
-  const emojis = [...answers.interests.map((i) => INTEREST_BY_ID[i]?.e), OCCASIONS.find((o) => o.v === answers.occasion)?.e]
+  const icons = [...answers.interests.filter((i) => INTEREST_BY_ID[i]), OCCASIONS.find((o) => o.v === answers.occasion)?.icon]
     .filter(Boolean);
-  while (emojis.length < 6) emojis.push(['✨', '🎁', '💝', '🌟', '🎀', '💫'][emojis.length]);
+  for (const filler of ['gift', 'heart', 'sparkles', 'star4', 'ticket', 'leaf']) if (icons.length < 6) icons.push(filler);
   const orbit = h('div', { class: 'searching__orbit' },
-    emojis.slice(0, 8).map((e, i, arr) => h('span', { style: { '--a': `${(360 / arr.length) * i}deg` } }, h('i', null, e))));
+    icons.slice(0, 8).map((name, i, arr) => h('span', { style: { '--a': `${(360 / arr.length) * i}deg` } }, h('i', { html: iconSvg(name, 1.8) }))));
   const gift = searchingGift();
   const msg = h('p', { class: 'searching__msg' }, messages[0]);
   const bar = h('span');

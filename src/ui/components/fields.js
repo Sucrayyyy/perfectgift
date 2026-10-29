@@ -50,7 +50,6 @@ function chips(field, ctx) {
   };
   for (const o of fieldOptions(field, ctx.answers())) {
     const btn = h('button', { type: 'button', class: 'chip', dataset: { v: String(o.v) } },
-      o.e ? h('span', { class: 'chip__emoji' }, o.e) : null,
       o.l,
       field.multi ? h('span', { class: 'chip__check', html: iconSvg('check') }) : null,
     );
@@ -73,9 +72,9 @@ function tiles(field, ctx) {
     for (const t of grid.children) t.classList.toggle('is-on', ctx.get(field.key) === t.dataset.v);
   };
   for (const o of fieldOptions(field, ctx.answers())) {
-    const t = h('button', { type: 'button', class: 'tile tile--compact', dataset: { v: o.v } },
-      h('span', { class: 'tile__emoji' }, o.e),
-      h('span', null, o.l, o.sub ? h('small', null, o.sub) : null),
+    const t = h('button', { type: 'button', class: 'tile tile--type', dataset: { v: o.v } },
+      h('span', { class: 'tile__big' }, o.big, h('small', null, ' ans')),
+      h('span', { class: 'tile__label' }, o.l),
       h('span', { class: 'tile__check', html: iconSvg('check') }),
     );
     t.addEventListener('click', () => {
@@ -96,7 +95,10 @@ function scale(field, ctx) {
     for (const b of row.children) b.classList.toggle('is-on', String(ctx.get(field.key)) === b.dataset.v);
   };
   for (const o of field.options) {
-    const b = h('button', { type: 'button', class: 'scale__opt', dataset: { v: String(o.v) } }, h('span', { class: 'e' }, o.e), o.l);
+    const gap = [0, 11, 7, 3.5, 0][o.v];
+    const b = h('button', { type: 'button', class: 'scale__opt', dataset: { v: String(o.v) } },
+      h('span', { class: 'scale__art', html: `<svg viewBox="0 0 40 20" aria-hidden="true"><circle cx="${20 - gap - 4}" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle class="b" cx="${20 + gap + 4}" cy="10" r="6"/></svg>` }),
+      o.l);
     b.addEventListener('click', () => {
       ctx.set(field.key, o.v);
       paint();
@@ -155,9 +157,9 @@ function bipolar(field, ctx) {
   for (const t of fieldOptions(field, ctx.answers())) {
     const thumb = h('span', { class: 'bipolar__thumb' });
     const opts = [
-      { v: -1, el: h('button', { type: 'button', class: 'bipolar__opt' }, h('span', { class: 'e' }, t.left.e), t.left.l) },
+      { v: -1, el: h('button', { type: 'button', class: 'bipolar__opt' }, t.left.l) },
       { v: 0, el: h('button', { type: 'button', class: 'bipolar__opt bipolar__opt--mid', 'aria-label': 'Un peu des deux' }, '·  ·') },
-      { v: 1, el: h('button', { type: 'button', class: 'bipolar__opt' }, h('span', { class: 'e' }, t.right.e), t.right.l) },
+      { v: 1, el: h('button', { type: 'button', class: 'bipolar__opt' }, t.right.l) },
     ];
     const track = h('div', { class: 'bipolar__track', role: 'radiogroup', 'aria-label': t.q }, thumb, ...opts.map((o) => o.el));
     const place = () => {
@@ -195,7 +197,7 @@ function interests(field, ctx) {
   };
   for (const it of interestsFor(ctx.answers())) {
     const t = h('button', { type: 'button', class: 'tile', dataset: { v: it.id } },
-      h('span', { class: 'tile__emoji' }, it.e),
+      h('span', { class: 'tile__icon', style: { '--tint': it.hue[1] }, html: iconSvg(it.id, 1.7) }),
       h('span', null, it.l),
       h('span', { class: 'tile__check', html: iconSvg('check') }),
     );
@@ -253,7 +255,7 @@ function interests(field, ctx) {
 function budget(field, ctx) {
   const amount = h('span', { class: 'budget__amount' });
   const display = h('div', { class: 'budget__display' }, amount);
-  const grid = h('div', { class: 'tiles tiles--3' });
+  const grid = h('div', { class: 'tiles' });
   const error = h('div', { class: 'budget__error', role: 'alert' });
   const minIn = h('input', { class: 'input', type: 'number', inputmode: 'numeric', min: 0, placeholder: '0' });
   const maxIn = h('input', { class: 'input', type: 'number', inputmode: 'numeric', min: 1, placeholder: '150' });
@@ -283,9 +285,9 @@ function budget(field, ctx) {
   };
 
   for (const o of field.options) {
-    const t = h('button', { type: 'button', class: 'tile', dataset: { v: o.v } },
-      h('span', { class: 'tile__emoji' }, o.e),
-      h('span', null, o.l),
+    const t = h('button', { type: 'button', class: 'tile tile--type tile--budget', dataset: { v: o.v } },
+      h('span', { class: 'tile__label' }, o.pre || '\u00a0'),
+      h('span', { class: 'tile__big' }, o.big),
     );
     t.addEventListener('click', () => {
       const next = { ...b(), preset: o.v };

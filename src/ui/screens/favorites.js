@@ -7,6 +7,7 @@ import { GIFT_TYPES } from '../../domain/options.js';
 import { merchantRow, MODE_META } from '../components/giftCard.js';
 import { openSheet, toast } from '../components/overlay.js';
 import { emptyGift } from '../components/brand.js';
+import { giftArt } from '../components/art.js';
 
 const ORIGINALITY = ['', 'Classique', 'Sûr', 'Original', 'Audacieux', 'Inattendu'];
 const priceText = (f) => (f.verified ? `${formatRange(f.price)}` : `≈ ${formatRange(f.price)}`);
@@ -32,15 +33,15 @@ function compare(list) {
   openSheet({
     title: 'Comparer',
     body: h('div', { class: 'compare' }, list.map((f) => h('div', { class: 'compare__col' },
-      h('div', { class: 'compare__art', style: { '--a': f.hue[0], '--b': f.hue[1] } }, f.e),
+      h('div', { class: 'compare__art', style: { '--a': f.hue[0], '--b': f.hue[1] } }, giftArt(f.ic || 'gift', { size: 'md' })),
       h('dl', { class: 'compare__body' },
         h('div', { class: 'compare__title' }, f.t),
         row('Prix', `${priceText(f)}${f.verified ? '' : ' (indicatif)'}`, f.price[0] === cheapest),
         row('Pertinence', `${f.relevance} %`, f.relevance === mostRelevant),
         row('Originalité', `${'●'.repeat(f.o)}${'○'.repeat(5 - f.o)} · ${ORIGINALITY[f.o]}`),
-        row('Type', `${GIFT_TYPES[f.y].e} ${GIFT_TYPES[f.y].l}`),
+        row('Type', GIFT_TYPES[f.y].l),
         row('Mode', MODE_META[f.mode].label),
-        row('Où', f.links.filter((l) => l.short !== '€' && l.short !== '📍').map((l) => l.name).join(', ') || 'Recherche en ligne'),
+        row('Où', f.links.filter((l) => l.id !== 'gshop' && l.id !== 'experiences').map((l) => l.name).join(', ') || 'Recherche en ligne'),
         row('Pourquoi', f.why),
       )))),
   });
@@ -106,10 +107,10 @@ export function FavoritesScreen() {
       toast('Retiré des favoris', { action: 'Annuler', onAction: () => { favorites.toggle(f); render(); } });
     });
     card.append(
-      h('span', { class: 'litem__art', style: { '--a': f.hue[0], '--b': f.hue[1] } }, f.e),
+      h('span', { class: 'litem__art', style: { '--a': f.hue[0], '--b': f.hue[1] }, html: iconSvg(f.ic || 'gift', 1.6) }),
       h('span', { class: 'litem__body' },
         h('span', { class: 'litem__title', style: { display: 'block' } }, f.t),
-        h('span', { class: 'litem__meta' }, h('b', null, priceText(f)), h('span', null, `${GIFT_TYPES[f.y].e} ${GIFT_TYPES[f.y].l}`), h('span', null, `${f.relevance} % pertinent`)),
+        h('span', { class: 'litem__meta' }, h('b', null, priceText(f)), h('span', null, GIFT_TYPES[f.y].l), h('span', null, `${f.relevance} % pertinent`)),
       ),
       h('span', { class: 'litem__actions' }, selecting ? h('span', { class: 'litem__select', html: iconSvg('check') }) : remove),
       open,

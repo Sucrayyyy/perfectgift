@@ -86,11 +86,11 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .display {
   font-family: var(--font-display);
   font-optical-sizing: auto;
-  font-weight: 560;
-  letter-spacing: -.02em;
-  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.04;
 }
-.display em { font-style: italic; font-weight: 500; color: var(--ribbon); }
+.display em, .display .accent { font-style: normal; color: var(--ribbon); }
 .h1 { font-size: clamp(34px, 9.6vw, 46px); }
 .h2 { font-size: clamp(27px, 7.4vw, 34px); }
 .h3 { font-size: 22px; line-height: 1.15; }

@@ -1,7 +1,7 @@
 // Service worker : l'app s'ouvre même hors connexion une fois installée sur l'écran d'accueil.
 // Stratégie « réseau d'abord » pour nos fichiers (les mises à jour arrivent au lancement suivant),
 // « cache d'abord » pour les polices. Pensez à incrémenter VERSION à chaque déploiement.
-const VERSION = 'pg-v1';
+const VERSION = 'pg-v2';
 const SHELL = [
   './',
   './index.html',
@@ -28,6 +28,7 @@ const SHELL = [
   './src/domain/questionnaire.js',
   './src/services/config.js',
   './src/services/recommendations.js',
+  './src/ui/components/art.js',
   './src/ui/components/brand.js',
   './src/ui/components/fields.js',
   './src/ui/components/giftCard.js',

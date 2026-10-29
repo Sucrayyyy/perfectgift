@@ -3,10 +3,10 @@ import { h, formatRange, formatPrice, formatDate, frenchSpacing } from '../../co
 import { icon, iconSvg } from '../../core/icons.js';
 import { animate, pop, burst, countUp, UNWRAP, EASE } from '../../core/motion.js';
 import { favorites } from '../../core/store.js';
-import { INTEREST_BY_ID, GENERIC_HUE } from '../../domain/interests.js';
 import { GIFT_TYPES } from '../../domain/options.js';
 import { purchaseLinks, DATA_MODE } from '../../services/recommendations.js';
 import { openSheet, toast } from './overlay.js';
+import { giftArt, ideaIcon, hueFor } from './art.js';
 
 export const MODE_META = {
   safe: { name: 'SAFE', label: 'Valeur sûre', group: 'Les valeurs sûres' },
@@ -15,16 +15,12 @@ export const MODE_META = {
 };
 const ORIGINALITY = ['', 'Classique', 'Sûr', 'Original', 'Audacieux', 'Inattendu'];
 
-export function hueFor(idea) {
-  return INTEREST_BY_ID[idea.i[0]]?.hue || GENERIC_HUE;
-}
-
 /** Instantané stocké dans les favoris (indépendant des évolutions du catalogue). */
 export function snapshot(c, searchId) {
   const offer = c.offers?.[0];
   return {
     id: c.idea.id,
-    e: c.idea.e,
+    ic: ideaIcon(c.idea),
     t: c.idea.t,
     d: c.idea.d,
     y: c.idea.y,
@@ -35,7 +31,7 @@ export function snapshot(c, searchId) {
     hue: hueFor(c.idea),
     price: offer ? [offer.price, offer.price] : c.price.range,
     verified: !!offer,
-    links: purchaseLinks(c).map(({ name, url, type, price, merchant, short, tone, kind }) => ({ name: name || merchant, url, type, price, short, tone, kind })),
+    links: purchaseLinks(c).map(({ id, name, url, type, price, merchant, short, icon: ic, tone, kind }) => ({ id, name: name || merchant, url, type, price, short, icon: ic, tone, kind })),
     searchId,
   };
 }
@@ -63,7 +59,7 @@ export function giftCard(c, { searchId, rank, onReject }) {
   const [a, b, cc] = hueFor(idea);
   const type = GIFT_TYPES[idea.y];
   const offer = c.offers?.[0];
-  const merchants = offer ? [offer.merchant] : purchaseLinks(c).filter((l) => l.short !== '€' && l.short !== '📍').map((l) => l.name).slice(0, 3);
+  const merchants = offer ? [offer.merchant] : purchaseLinks(c).filter((l) => l.id !== 'gshop' && l.id !== 'experiences').map((l) => l.name).slice(0, 3);
 
   const favBtn = h('button', {
     type: 'button',
@@ -91,9 +87,9 @@ export function giftCard(c, { searchId, rank, onReject }) {
     h('div', { class: 'gcard__art', style: { '--a': a, '--b': b, '--c': cc } },
       offer?.image
         ? h('img', { src: offer.image, alt: '', loading: 'lazy', style: { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' } })
-        : h('span', { class: 'gcard__emoji' }, idea.e),
+        : giftArt(ideaIcon(idea)),
       h('div', { class: 'gcard__badges' },
-        h('span', { class: 'pill pill--glass' }, `${type.e} ${type.l}`),
+        h('span', { class: 'pill pill--glass' }, icon(type.icon), type.l),
         h('span', { class: `pill pill--${c.mode}` }, MODE_META[c.mode].name),
       ),
       favBtn,
@@ -129,8 +125,8 @@ export function giftCard(c, { searchId, rank, onReject }) {
   card.reveal = () => {
     card.classList.remove('enter');
     animate(card, UNWRAP, { duration: 640, easing: EASE.out });
-    const emoji = card.querySelector('.gcard__emoji');
-    if (emoji) animate(emoji, [{ transform: 'scale(.4) rotate(-30deg)', opacity: 0 }, { transform: 'scale(1) rotate(-6deg)', opacity: 1 }], { duration: 820, delay: 120, easing: EASE.spring });
+    const art = card.querySelector('.art-badge');
+    if (art) animate(art, [{ transform: 'scale(.5) rotate(-24deg)', opacity: 0 }, { transform: 'scale(1) rotate(-6deg)', opacity: 1 }], { duration: 820, delay: 120, easing: EASE.spring });
     setTimeout(() => {
       meterFill.style.width = `${c.relevance}%`;
       countUp(meterValue, c.relevance, { duration: 1000, format: (v) => `${Math.round(v)} %` });
@@ -163,7 +159,7 @@ export function openWhere(c, extraNotes = []) {
 export function merchantRow(l) {
   const isOffer = l.type === 'offer';
   return h('a', { class: 'merchant', href: l.url, target: '_blank', rel: 'noopener noreferrer' },
-    h('span', { class: 'merchant__logo', style: { background: l.tone || '#2B1846' } }, l.short || (l.merchant || '?').slice(0, 2)),
+    h('span', { class: 'merchant__logo', style: { background: l.tone || '#2B1846' } }, l.icon ? icon(l.icon) : l.short || (l.merchant || '?').slice(0, 2)),
     h('span', { class: 'merchant__text' },
       h('b', null, isOffer ? `${formatPrice(l.price)} · ${l.merchant}` : l.name),
       h('span', null, isOffer

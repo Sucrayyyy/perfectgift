@@ -12,11 +12,6 @@
 @keyframes twinkle { 0%, 100% { transform: scale(.6) rotate(0deg); opacity: .35; } 50% { transform: scale(1.1) rotate(45deg); opacity: 1; } }
 @keyframes lid-bob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-9px) rotate(-2.5deg); } }
 @keyframes star-pulse { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.12) rotate(12deg); } }
-@keyframes confetti-rise {
-  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-  15% { opacity: 1; }
-  100% { transform: translate(var(--dx, 0), -150px) rotate(var(--rot, 180deg)); opacity: 0; }
-}
 @keyframes shake {
   0%, 100% { transform: rotate(0deg); }
   20% { transform: rotate(-5deg); } 40% { transform: rotate(4deg); }
@@ -27,7 +22,7 @@
 @keyframes ink-draw { to { stroke-dashoffset: 0; } }
 
 /* ---------- Illustration du héros ---------- */
-.gift-hero { width: 230px; height: 230px; overflow: visible; }
+.gift-hero { overflow: visible; }
 .gift-hero .g-shadow { transform-origin: 115px 214px; animation: breathe 3.6s var(--ease-in-out) infinite; }
 .gift-hero .g-lid { transform-origin: 115px 92px; animation: lid-bob 3.6s var(--ease-in-out) infinite; }
 .gift-hero .g-star { transform-box: fill-box; transform-origin: center; animation: star-pulse 3.6s var(--ease-in-out) infinite; }
@@ -38,7 +33,6 @@
 .gift-hero .g-spark:nth-of-type(4) { animation-delay: 2.1s; }
 .gift-hero .g-ring { transform-origin: 115px 120px; animation: spin-slow 40s linear infinite; }
 
-.confetti { position: absolute; left: 50%; bottom: 40px; width: 8px; height: 12px; border-radius: 2px; animation: confetti-rise 3.6s var(--ease-out) infinite; opacity: 0; }
 
 /* Recherche : la boîte tremble puis s'ouvre */
 .searching__gift .g-box { transform-origin: 75px 142px; animation: shake 1.1s var(--ease-in-out) infinite; }
@@ -78,5 +72,4 @@ html[data-dir="fade"]::view-transition-new(root) { animation-name: vt-fade-in; }
     scroll-behavior: auto !important;
   }
   .backdrop__blob { animation: none !important; }
-  .confetti { display: none; }
 }

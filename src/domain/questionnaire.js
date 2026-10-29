@@ -12,7 +12,6 @@ export const STEPS = [
   {
     id: 'who', section: 'La personne',
     title: 'Pour qui cherche-t-on ?',
-    sub: 'Le prénom sert uniquement à personnaliser les idées. Rien ne quitte votre téléphone.',
     fields: [
       { type: 'text', key: 'name', label: 'Son prénom', placeholder: 'ex. Léa', optional: true, maxLength: 30, autocomplete: 'off' },
       { type: 'tiles', key: 'ageBand', label: 'Son âge', options: AGE_BANDS, columns: 2 },
@@ -37,7 +36,6 @@ export const STEPS = [
   {
     id: 'intent', section: "L'intention",
     title: 'Quel cadeau imaginez-vous ?',
-    sub: "Jusqu'à 3 intentions, puis le format. Dans le doute, laissez « Ouvert à tout ».",
     optional: true,
     fields: [
       { type: 'chips', key: 'tones', label: 'Le cadeau doit être…', multi: true, max: 3, options: TONES, optional: true },
@@ -48,7 +46,6 @@ export const STEPS = [
   {
     id: 'interests', section: 'Ses passions',
     title: (a) => (isBaby(a) ? 'Quel univers pour son éveil ?' : a.name?.trim() ? `Qu'est-ce qui passionne ${a.name.trim()} ?` : 'Quelles sont ses passions ?'),
-    sub: (a) => (isBaby(a) ? 'Choisissez un ou plusieurs univers.' : 'Sélectionnez tout ce qui compte. Une passion manque ? Ajoutez-la.'),
     fields: [{ type: 'interests', key: 'interests' }],
     valid: (a) => a.interests.length + a.customInterests.length > 0,
     skipLabel: 'Je ne sais pas',
@@ -57,7 +54,7 @@ export const STEPS = [
   {
     id: 'personality', section: 'Personnalité',
     title: (a) => `Et côté personnalité${a.name?.trim() ? `, ${a.name.trim()}` : ''} ?`,
-    sub: 'Pas de bonne réponse : suivez votre intuition. Le milieu veut dire « un peu des deux ».',
+    sub: 'Le point du milieu : un peu des deux.',
     when: (a) => !isBaby(a),
     optional: true,
     fields: [
@@ -68,7 +65,6 @@ export const STEPS = [
   {
     id: 'context', section: 'Ses envies',
     title: 'Ce qui lui trotte dans la tête',
-    sub: 'Sujets du moment, envies, objets convoités : de vraies pépites pour nous.',
     when: (a) => !isBaby(a),
     optional: true,
     fields: [
@@ -80,7 +76,6 @@ export const STEPS = [
   {
     id: 'extras', section: 'À éviter',
     title: "Ce qu'on doit éviter",
-    sub: 'Pour ne pas offrir un doublon ou un cadeau qui tombe à plat.',
     optional: true,
     fields: [
       { type: 'text', key: 'owned', role: 'owned', label: 'Ce que la personne possède déjà', placeholder: 'ex. Kindle, AirPods, machine Nespresso…', optional: true },
@@ -92,7 +87,7 @@ export const STEPS = [
   {
     id: 'story', section: 'Le petit plus',
     title: 'Raconte-nous tout.',
-    sub: 'Tout ce qui pourrait nous aider à trouver LE cadeau : anecdotes, rêves, manies, souvenirs partagés…',
+    sub: 'Tout ce qui pourrait nous aider à trouver LE cadeau.',
     optional: true,
     fields: [
       { type: 'textarea', key: 'story', role: 'story', placeholder: 'ex. Vient de se mettre à la céramique, rêve du Japon, boit trois cafés par jour et ne jure que par les jeux de société en famille…', optional: true, maxLength: 1200 },
@@ -101,14 +96,12 @@ export const STEPS = [
   {
     id: 'budget', section: 'Budget',
     title: 'Quel budget ?',
-    sub: 'On cherche la meilleure idée à chaque niveau de prix, pas seulement près du maximum.',
     fields: [{ type: 'budget', key: 'budget', options: BUDGETS }],
     valid: (a) => budgetRange(a) !== null,
   },
   {
     id: 'modes', section: 'Audace',
     title: "Quel niveau d'audace ?",
-    sub: 'Combinez plusieurs modes pour une sélection rangée du plus sûr au plus audacieux.',
     fields: [{ type: 'modes', key: 'modes' }],
     valid: (a) => a.modes.length > 0,
   },
@@ -120,7 +113,6 @@ function deepStep(interest) {
     section: 'Ses passions',
     interest: interest.id,
     title: interest.deepTitle,
-    sub: 'Plus on en sait, plus les idées seront précises. Tout est facultatif.',
     optional: true,
     fields: interest.deep,
   };

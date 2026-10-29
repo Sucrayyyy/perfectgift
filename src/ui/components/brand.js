@@ -30,11 +30,11 @@ export function markSvg() {
 export function logo({ size = 34, word = true } = {}) {
   return h('span', { class: 'logo', 'aria-label': 'PerfectGift' },
     h('span', { class: 'logo__mark', style: { width: `${size}px`, height: `${size}px` }, html: markSvg() }),
-    word && h('span', { class: 'logo__word', html: 'Perfect<i>Gift</i>' }),
+    word && h('span', { class: 'logo__word', html: 'Perfect<span>Gift</span>' }),
   );
 }
 
-/** Grande illustration de l'accueil : couvercle qui flotte, étoile qui pulse, étincelles. */
+/** Illustration de l'accueil : couvercle qui flotte, étoile qui pulse, étincelles. */
 export function heroGift() {
   const id = `pg${++uid}`;
   const sparks = [[38, 62, 9], [196, 74, 7], [26, 150, 6], [204, 158, 10]]
@@ -42,7 +42,7 @@ export function heroGift() {
   const el = h('div', { class: 'hero__art' });
   el.innerHTML = `<svg class="gift-hero" viewBox="0 0 230 230" aria-hidden="true">${defs(id)}
     <circle class="g-ring" cx="115" cy="120" r="104" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="1.5" stroke-dasharray="3 9"/>
-    <ellipse class="g-shadow" cx="115" cy="214" rx="72" ry="9" fill="#2B1846" opacity=".13"/>
+    <ellipse class="g-shadow" cx="115" cy="214" rx="72" ry="9" fill="#2B1846" fill-opacity=".13"/>
     <g class="g-body">
       <rect x="45" y="104" width="140" height="102" rx="24" fill="url(#r${id})"/>
       <rect x="45" y="112" width="140" height="8" fill="#2B1846" opacity=".12"/>
@@ -58,19 +58,6 @@ export function heroGift() {
     </g>
     ${sparks}
   </svg>`;
-  const colors = ['#E9483A', '#F2B544', '#FF8A5B', '#6A48F5', '#1C8A6E'];
-  for (let i = 0; i < 10; i++) {
-    el.append(h('span', {
-      class: 'confetti',
-      style: {
-        background: colors[i % colors.length],
-        '--dx': `${(i % 2 ? 1 : -1) * (30 + ((i * 37) % 90))}px`,
-        '--rot': `${120 + i * 40}deg`,
-        animationDelay: `${(i * 0.37).toFixed(2)}s`,
-        left: `${40 + ((i * 13) % 20)}%`,
-      },
-    }));
-  }
   return el;
 }
 

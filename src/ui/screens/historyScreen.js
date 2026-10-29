@@ -1,6 +1,6 @@
 // Historique : retrouver une recherche, ses réponses et ses idées ; la relancer ou la modifier.
 import { h, formatDate, formatPrice } from '../../core/dom.js';
-import { icon } from '../../core/icons.js';
+import { icon, iconSvg } from '../../core/icons.js';
 import { collapse, stagger, RISE } from '../../core/motion.js';
 import { history, draft } from '../../core/store.js';
 import { navigate } from '../../core/router.js';
@@ -33,16 +33,16 @@ export function HistoryScreen() {
     });
     node.append(
       h('div', { class: 'hist__top' },
-        h('span', { class: 'hist__emoji' }, occ?.e || '🎁'),
+        h('span', { class: 'hist__icon', html: iconSvg(occ?.icon || 'gift', 1.7) }),
         h('div', { class: 'grow' },
           h('div', { class: 'hist__title' }, `${a.name ? `Pour ${a.name}` : 'Pour cette personne'}${occ ? ` · ${occ.l}` : ''}`),
           h('div', { class: 'hist__date' }, formatDate(s.createdAt))),
         del),
       h('div', { class: 'hist__tags' },
-        age ? h('span', { class: 'pill' }, `${age.e} ${age.sub}`) : null,
-        range ? h('span', { class: 'pill' }, `💶 ${range[0]} – ${formatPrice(range[1])}`) : null,
+        age ? h('span', { class: 'pill' }, age.sub) : null,
+        range ? h('span', { class: 'pill' }, `${range[0]} – ${formatPrice(range[1])}`) : null,
         ...a.modes.map((m) => h('span', { class: `pill pill--${m}` }, MODE_META[m].name)),
-        ...a.interests.slice(0, 4).map((i) => h('span', { class: 'pill' }, `${INTEREST_BY_ID[i]?.e || ''} ${INTEREST_BY_ID[i]?.l || i}`)),
+        ...a.interests.slice(0, 4).map((i) => h('span', { class: 'pill' }, icon(i), INTEREST_BY_ID[i]?.l || i)),
       ),
       h('div', { class: 'hist__actions' },
         h('button', { type: 'button', class: 'btn btn--dark btn--sm', onclick: () => navigate(`/results/${s.id}`) }, icon('gift'), 'Voir les idées'),

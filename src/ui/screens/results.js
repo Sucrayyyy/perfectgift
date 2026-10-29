@@ -32,12 +32,12 @@ const SORTS = [
 ];
 
 const REFINE = [
-  { id: 'more', e: '🔄', l: 'Trouve-moi d’autres idées', sub: 'Une nouvelle sélection, sans les idées actuelles', done: 'Voici une nouvelle sélection' },
-  { id: 'original', e: '🦄', l: 'Sois plus original', sub: 'Plus de surprises, moins d’évidences', done: 'On ose davantage' },
-  { id: 'cheaper', e: '💶', l: 'Reste dans un budget inférieur', sub: 'Plafond abaissé d’environ un tiers', done: 'Budget revu à la baisse' },
-  { id: 'personal', e: '🫶', l: 'Propose-moi quelque chose de plus personnel', sub: 'Personnalisé, sentimental, unique', done: 'Des idées plus personnelles', toggle: 'personal' },
-  { id: 'immaterial', e: '🎟️', l: 'Évite les objets matériels', sub: 'Expériences, ateliers et abonnements', done: 'Plus aucun objet matériel', toggle: 'noMaterial' },
-  { id: 'none', e: '🙅', l: 'Je n’aime aucune de ces propositions', sub: 'On change d’approche en évitant ces pistes', done: 'On change d’approche' },
+  { id: 'more', icon: 'refresh', l: 'Trouve-moi d’autres idées', sub: 'Une nouvelle sélection, sans les idées actuelles', done: 'Voici une nouvelle sélection' },
+  { id: 'original', icon: 'sparkles', l: 'Sois plus original', sub: 'Plus de surprises, moins d’évidences', done: 'On ose davantage' },
+  { id: 'cheaper', icon: 'euro', l: 'Reste dans un budget inférieur', sub: 'Plafond abaissé d’environ un tiers', done: 'Budget revu à la baisse' },
+  { id: 'personal', icon: 'heart', l: 'Propose-moi quelque chose de plus personnel', sub: 'Personnalisé, sentimental, unique', done: 'Des idées plus personnelles', toggle: 'personal' },
+  { id: 'immaterial', icon: 'ticket', l: 'Évite les objets matériels', sub: 'Expériences, ateliers et abonnements', done: 'Plus aucun objet matériel', toggle: 'noMaterial' },
+  { id: 'none', icon: 'thumbs-down', l: 'Je n’aime aucune de ces propositions', sub: 'On change d’approche en évitant ces pistes', done: 'On change d’approche' },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -189,9 +189,9 @@ export function ResultsScreen({ id }) {
       h('span', { class: 'eyebrow' }, `${result.best.length} idées sur-mesure`),
       h('h1', { class: 'display' }, 'Pour ', h('em', null, profile.name || 'cette personne')),
       h('div', { class: 'results__summary' },
-        occ ? h('span', { class: 'pill' }, `${occ.e} ${occ.l}`) : null,
-        rel ? h('span', { class: 'pill' }, `${rel.e} ${rel.l}`) : null,
-        h('span', { class: 'pill' }, `💶 ${budgetLabel}`),
+        occ ? h('span', { class: 'pill' }, icon(occ.icon), occ.l) : null,
+        rel ? h('span', { class: 'pill' }, rel.l) : null,
+        h('span', { class: 'pill' }, budgetLabel),
         ...['safe', 'perfect', 'extra'].filter((m) => profile.modes.has(m)).map((m) => h('span', { class: `pill pill--${m}` }, MODE_META[m].name)),
         mode === 'live'
           ? h('span', { class: 'pill pill--ok' }, icon('check'), 'Offres vérifiées')
@@ -306,14 +306,14 @@ export function ResultsScreen({ id }) {
       h('p', null, 'Affinez sans refaire le questionnaire.'),
       h('div', { class: 'chips' }, REFINE.map((a) => h('button', {
         type: 'button', class: ['chip chip--sm', a.toggle && adj[a.toggle] && 'is-on'], onclick: () => relaunch(a),
-      }, h('span', { class: 'chip__emoji' }, a.e), a.l))),
+      }, icon(a.icon), a.l))),
     );
   }
 
   function renderRate() {
     const existing = feedback.forSearch(id);
     if (existing) {
-      rate.replaceChildren(h('p', { class: 'rate__thanks' }, 'Merci pour votre retour ✦'), h('p', { class: 'subtle mt-8' }, 'Il nous aide à mieux classer les prochaines idées.'));
+      rate.replaceChildren(h('p', { class: 'rate__thanks' }, 'Merci pour votre retour.'), h('p', { class: 'subtle mt-8' }, 'Il nous aide à mieux classer les prochaines idées.'));
       return;
     }
     const answer = (value) => {
@@ -359,7 +359,7 @@ export function ResultsScreen({ id }) {
     refineSheet = openSheet({
       title: 'Affiner la sélection',
       body: h('div', { class: 'refine-list' }, REFINE.map((a) => h('button', { type: 'button', class: 'refine-item', onclick: () => relaunch(a) },
-        h('span', { class: 'e' }, a.e),
+        h('span', { class: 'e' }, icon(a.icon)),
         h('span', { class: 'grow' }, h('b', null, a.l), h('span', null, a.toggle && adj[a.toggle] ? 'Activé · touchez pour désactiver' : a.sub)),
         a.toggle && adj[a.toggle] ? h('span', { class: 'pill pill--ok' }, icon('check'), 'Actif') : icon('chevron-right'),
       ))),
@@ -421,7 +421,7 @@ export function ResultsScreen({ id }) {
       applyBtn.disabled = !n;
     };
     const chipSet = (set, items) => h('div', { class: 'chips' }, items.map((it) => {
-      const b = h('button', { type: 'button', class: ['chip chip--sm', set.has(it.v) && 'is-on'] }, it.e ? h('span', { class: 'chip__emoji' }, it.e) : null, it.l);
+      const b = h('button', { type: 'button', class: ['chip chip--sm', set.has(it.v) && 'is-on'] }, it.icon ? icon(it.icon) : null, it.l);
       b.addEventListener('click', () => {
         set.has(it.v) ? set.delete(it.v) : set.add(it.v);
         b.classList.toggle('is-on', set.has(it.v));
@@ -450,8 +450,8 @@ export function ResultsScreen({ id }) {
     const group = (title, ...content) => h('div', { class: 'filter-group' }, h('div', { class: 'filter-group__title' }, title), ...content);
     const body = h('div', null,
       group('Prix (€)', h('div', { class: 'range-row' }, minIn, h('span', { class: 'subtle' }, '→'), maxIn)),
-      group('Type de cadeau', chipSet(f.types, typeIds.map((t) => ({ v: t, l: GIFT_TYPES[t].l, e: GIFT_TYPES[t].e })))),
-      group('Catégorie', chipSet(f.interests, interestIds.map((i) => (i === 'generic' ? { v: 'generic', l: 'Idées transversales', e: '🎁' } : { v: i, l: INTEREST_BY_ID[i].l, e: INTEREST_BY_ID[i].e })))),
+      group('Type de cadeau', chipSet(f.types, typeIds.map((t) => ({ v: t, l: GIFT_TYPES[t].l, icon: GIFT_TYPES[t].icon })))),
+      group('Catégorie', chipSet(f.interests, interestIds.map((i) => (i === 'generic' ? { v: 'generic', l: 'Idées transversales', icon: 'gift' } : { v: i, l: INTEREST_BY_ID[i].l, icon: i })))),
       group('Originalité', single('minOriginality', [{ v: 0, l: 'Toutes' }, { v: 3, l: 'Originales et +' }, { v: 4, l: 'Audacieuses' }])),
       group('Pertinence', single('minRelevance', [{ v: 0, l: 'Toutes' }, { v: 70, l: '70 % et +' }, { v: 80, l: '80 % et +' }])),
       group('Vendeur', chipSet(f.merchants, merchantNames.map((m) => ({ v: m, l: m })))),

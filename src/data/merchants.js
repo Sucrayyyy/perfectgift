@@ -17,7 +17,7 @@ export const MERCHANTS = {
   lego: { name: 'LEGO', short: 'Lg', tone: '#D99418', kind: 'Boutique officielle', search: (q) => `https://www.lego.com/fr-fr/search?q=${enc(q)}` },
   etsy: { name: 'Etsy', short: 'Et', tone: '#E0711C', kind: 'Créateurs & artisans', search: (q) => `https://www.etsy.com/fr/search?q=${enc(q)}` },
   gshop: { name: 'Comparer les prix', short: '€', tone: '#1C8A6E', kind: 'Google Shopping', search: (q) => `https://www.google.com/search?udm=28&q=${enc(q)}` },
-  experiences: { name: 'Trouver près de chez vous', short: '📍', tone: '#6A48F5', kind: 'Activités & expériences', search: (q) => `https://www.google.com/search?q=${enc(q + ' près de chez moi')}` },
+  experiences: { name: 'Trouver près de chez vous', short: '', icon: 'map', tone: '#6A48F5', kind: 'Activités & expériences', search: (q) => `https://www.google.com/search?q=${enc(q + ' près de chez moi')}` },
 };
 
 export function merchant(id) {
@@ -29,6 +29,6 @@ export function searchLinks(idea) {
   return (idea.m || []).map((id) => {
     const m = MERCHANTS[id];
     if (!m) return null;
-    return { id, name: m.name, short: m.short, tone: m.tone, kind: m.kind, url: m.search(idea.q || idea.t), type: 'search' };
+    return { id, name: m.name, short: m.short, icon: m.icon, tone: m.tone, kind: m.kind, url: m.search(idea.q || idea.t), type: 'search' };
   }).filter(Boolean);
 }

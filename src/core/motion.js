@@ -72,7 +72,7 @@ export function shakeX(el) {
 }
 
 /** Petite gerbe de particules (cœurs, étoiles…) depuis le centre d'un élément. */
-export function burst(el, { glyphs = ['❤', '✦', '•'], colors = ['#E9483A', '#F2B544', '#FF8A5B', '#C2285F'], count = 14, spread = 70 } = {}) {
+export function burst(el, { colors = ['#E9483A', '#F2B544', '#FF8A5B', '#C2285F'], count = 14, spread = 70 } = {}) {
   if (reducedMotion() || !el) return;
   const rect = el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
@@ -81,11 +81,11 @@ export function burst(el, { glyphs = ['❤', '✦', '•'], colors = ['#E9483A',
     const p = document.createElement('span');
     const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
     const dist = spread * (0.6 + Math.random() * 0.6);
-    p.textContent = glyphs[i % glyphs.length];
+    const size = 5 + Math.random() * 5;
     Object.assign(p.style, {
       position: 'fixed', left: `${cx}px`, top: `${cy}px`, zIndex: 90, pointerEvents: 'none',
-      fontSize: `${10 + Math.random() * 9}px`, color: colors[i % colors.length], lineHeight: 1,
-      transform: 'translate(-50%, -50%)',
+      width: `${size}px`, height: `${size}px`, borderRadius: i % 3 ? '50%' : '2px',
+      background: colors[i % colors.length], transform: 'translate(-50%, -50%)',
     });
     document.body.append(p);
     p.animate([
