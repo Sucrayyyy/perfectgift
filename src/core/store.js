@@ -7,6 +7,7 @@ const KEYS = {
   feedback: 'pg.feedback',
   draft: 'pg.draft',
   theme: 'pg.theme',
+  people: 'pg.people',
 };
 
 const MAX_HISTORY = 30;
@@ -60,6 +61,10 @@ export const favorites = {
     write(KEYS.favorites, this.all().filter((f) => f.id !== id));
     emit('favorites');
   },
+  patch(id, patch) {
+    write(KEYS.favorites, this.all().map((f) => (f.id === id ? { ...f, ...patch } : f)));
+    emit('favorites');
+  },
 };
 
 export const history = {
@@ -88,6 +93,39 @@ export const history = {
   remove(id) {
     write(KEYS.history, this.all().filter((s) => s.id !== id));
     emit('history');
+  },
+};
+
+/** Proches : profil réutilisable (réponses), date d'anniversaire, cadeaux déjà offerts. */
+export const people = {
+  all() {
+    return read(KEYS.people, []);
+  },
+  get(id) {
+    return this.all().find((p) => p.id === id) || null;
+  },
+  save(person) {
+    const list = this.all();
+    const idx = list.findIndex((p) => p.id === person.id);
+    const next = { given: [], ...person, updatedAt: new Date().toISOString() };
+    if (idx >= 0) list[idx] = { ...list[idx], ...next };
+    else list.push({ createdAt: next.updatedAt, ...next });
+    list.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    write(KEYS.people, list);
+    emit('people');
+    return this.get(person.id);
+  },
+  remove(id) {
+    write(KEYS.people, this.all().filter((p) => p.id !== id));
+    emit('people');
+  },
+  /** Cadeau offert : il ne sera plus proposé à cette personne. */
+  setGiven(id, gift, given = true) {
+    const p = this.get(id);
+    if (!p) return null;
+    const list = (p.given || []).filter((g) => g.id !== gift.id);
+    if (given) list.unshift({ id: gift.id, t: gift.t, ic: gift.ic, at: new Date().toISOString() });
+    return this.save({ ...p, given: list });
   },
 };
 

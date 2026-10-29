@@ -17,12 +17,12 @@ export function QuizScreen() {
   let index = Math.max(0, steps.findIndex((s) => s.id === saved?.stepId));
   let fieldKeys = '';
   let busy = false;
+  const personId = saved?.personId || null;
 
-  const persist = () => draft.set({ answers, stepId: steps[index]?.id, updatedAt: new Date().toISOString() });
+  const persist = () => draft.set({ answers, stepId: steps[index]?.id, personId, updatedAt: new Date().toISOString() });
 
   const fill = h('span', { class: 'progress__fill' });
-  const star = h('span', { class: 'progress__star', html: iconSvg('star4') });
-  star.style.color = 'var(--gold)';
+  const star = h('span', { class: 'progress__knob' });
   const count = h('div', { class: 'progress__count' });
   const backBtn = h('button', { type: 'button', class: 'btn btn--icon', 'aria-label': 'Étape précédente', onclick: () => go(-1) }, icon('arrow-left'));
   const closeBtn = h('button', { type: 'button', class: 'btn btn--icon', 'aria-label': 'Quitter le questionnaire', onclick: () => { persist(); navigate('/', { dir: 'back' }); } }, icon('x'));
@@ -56,7 +56,7 @@ export function QuizScreen() {
     const step = steps[index];
     const valid = isStepValid(step, answers);
     const last = index === steps.length - 1;
-    nextBtn.replaceChildren(...[last && icon('star4'), last ? 'Lancer la recherche' : 'Continuer', !last && icon('arrow-right')].filter(Boolean));
+    nextBtn.replaceChildren(...[last ? 'Trouver ses cadeaux' : 'Continuer', icon(last ? 'search' : 'arrow-right')]);
     nextBtn.classList.toggle('is-disabled', !valid);
     nextBtn.style.opacity = valid ? '' : '.45';
     skipBtn.style.display = step.optional || step.skipLabel ? '' : 'none';
@@ -141,7 +141,7 @@ export function QuizScreen() {
     const nextIndex = (currentIdx < 0 ? index : currentIdx) + delta;
     if (nextIndex >= steps.length) {
       persist();
-      draft.set({ answers, stepId: step.id, ready: true });
+      draft.set({ answers, stepId: step.id, personId, ready: true });
       navigate('/search');
       return;
     }
@@ -162,8 +162,11 @@ export function QuizScreen() {
   };
 }
 
-/** Démarre un questionnaire neuf (éventuellement pré-rempli, ex. une occasion choisie sur l'accueil). */
-export function startQuiz(prefill = {}, stepId = 'who') {
-  draft.set({ answers: { ...emptyAnswers(), ...prefill }, stepId, updatedAt: new Date().toISOString() });
+/**
+ * Démarre un questionnaire (éventuellement pré-rempli). Pour un proche déjà enregistré,
+ * on repart de ses réponses et on va droit au budget : il suffit de mettre à jour.
+ */
+export function startQuiz(prefill = {}, { stepId = 'who', personId = null } = {}) {
+  draft.set({ answers: { ...emptyAnswers(), ...prefill }, stepId, personId, updatedAt: new Date().toISOString() });
   navigate('/quiz');
 }

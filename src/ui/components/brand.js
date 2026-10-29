@@ -1,100 +1,70 @@
-// Identité PerfectGift : symbole (un cadeau dont le nœud est une étoile), logotype et illustrations animées.
+// Identité PerfectGift : un cadeau noué d'un vrai ruban. Aplats, pas d'étoiles ni de halos.
 import { h } from '../../core/dom.js';
 
-let uid = 0;
-const STAR = (cx, cy, r) => {
-  const k = r * 0.09;
-  const j = r * 0.61;
-  return `M${cx} ${cy - r}C${cx + k} ${cy - j} ${cx + j} ${cy - k} ${cx + r} ${cy}C${cx + j} ${cy + k} ${cx + k} ${cy + j} ${cx} ${cy + r}C${cx - k} ${cy + j} ${cx - j} ${cy + k} ${cx - r} ${cy}C${cx - j} ${cy - k} ${cx - k} ${cy - j} ${cx} ${cy - r}Z`;
-};
-
-function defs(id) {
-  return `<defs>
-    <linearGradient id="r${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A5B"/><stop offset=".5" stop-color="#E9483A"/><stop offset="1" stop-color="#C2285F"/></linearGradient>
-    <linearGradient id="l${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A6B"/><stop offset=".55" stop-color="#F0533F"/><stop offset="1" stop-color="#D23466"/></linearGradient>
-    <linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE29A"/><stop offset=".5" stop-color="#F2B544"/><stop offset="1" stop-color="#E0951C"/></linearGradient>
-  </defs>`;
-}
+// Nœud dessiné dans un repère 64×64, centré sur (32, cy)
+const bow = (cy, fill, knot) => `
+  <path d="M32 ${cy}c-2.6-2.6-9.5-5.1-11.4-2.6-1.85 2.6 1.9 5.6 11.4 2.6Z" fill="${fill}"/>
+  <path d="M32 ${cy}c2.6-2.6 9.5-5.1 11.4-2.6 1.85 2.6-1.9 5.6-11.4 2.6Z" fill="${fill}"/>
+  <rect x="28.3" y="${cy - 2.7}" width="7.4" height="6" rx="2" fill="${knot}"/>`;
 
 export function markSvg() {
-  const id = `pg${++uid}`;
-  return `<svg viewBox="0 0 64 64" aria-hidden="true">${defs(id)}
-    <rect x="9" y="27" width="46" height="31" rx="9" fill="url(#r${id})"/>
-    <rect x="9" y="31" width="46" height="3.5" fill="#2B1846" opacity=".14"/>
-    <rect x="5" y="19" width="54" height="13" rx="6.5" fill="url(#l${id})"/>
-    <rect x="28" y="19" width="8" height="39" fill="#FFF4E8"/>
-    <path d="${STAR(32, 10.5, 10)}" fill="url(#g${id})"/>
+  return `<svg viewBox="0 0 64 64" aria-hidden="true">
+    <rect x="9" y="28" width="46" height="30" rx="7" fill="#E9483A"/>
+    <rect x="5" y="20" width="54" height="12" rx="5" fill="#C93A2E"/>
+    <rect x="28" y="20" width="8" height="38" fill="#FFF4E8"/>
+    ${bow(20, '#F2B544', '#D99418')}
   </svg>`;
 }
 
-export function logo({ size = 34, word = true } = {}) {
+export function logo({ size = 32, word = true } = {}) {
   return h('span', { class: 'logo', 'aria-label': 'PerfectGift' },
     h('span', { class: 'logo__mark', style: { width: `${size}px`, height: `${size}px` }, html: markSvg() }),
     word && h('span', { class: 'logo__word', html: 'Perfect<span>Gift</span>' }),
   );
 }
 
-/** Illustration de l'accueil : couvercle qui flotte, étoile qui pulse, étincelles. */
-export function heroGift() {
-  const id = `pg${++uid}`;
-  const sparks = [[38, 62, 9], [196, 74, 7], [26, 150, 6], [204, 158, 10]]
-    .map(([x, y, r]) => `<path class="g-spark" d="${STAR(x, y, r)}" fill="url(#g${id})"/>`).join('');
-  const el = h('div', { class: 'hero__art' });
-  el.innerHTML = `<svg class="gift-hero" viewBox="0 0 230 230" aria-hidden="true">${defs(id)}
-    <circle class="g-ring" cx="115" cy="120" r="104" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="1.5" stroke-dasharray="3 9"/>
-    <ellipse class="g-shadow" cx="115" cy="214" rx="72" ry="9" fill="#2B1846" fill-opacity=".13"/>
-    <g class="g-body">
-      <rect x="45" y="104" width="140" height="102" rx="24" fill="url(#r${id})"/>
-      <rect x="45" y="112" width="140" height="8" fill="#2B1846" opacity=".12"/>
-      <rect x="56" y="124" width="10" height="66" rx="5" fill="#fff" opacity=".18"/>
-      <rect x="103" y="104" width="24" height="102" fill="#FFF4E8"/>
-    </g>
-    <g class="g-lid">
-      <rect x="31" y="78" width="168" height="38" rx="17" fill="url(#l${id})"/>
-      <rect x="44" y="84" width="60" height="7" rx="3.5" fill="#fff" opacity=".22"/>
-      <rect x="103" y="78" width="24" height="38" fill="#FFF4E8"/>
-      <path class="g-star" d="${STAR(115, 47, 32)}" fill="url(#g${id})"/>
-      <path d="${STAR(108, 40, 6)}" fill="#fff" opacity=".55"/>
-    </g>
-    ${sparks}
-  </svg>`;
-  return el;
-}
-
-/** Cadeau de l'écran de recherche : il tremble, puis s'ouvre dans un éclat de lumière. */
+/**
+ * Recherche : on emballe le cadeau. Le couvercle se pose, le ruban s'enroule, le nœud se forme.
+ * La boucle tourne tant que le moteur travaille ; `.is-done` fige le paquet terminé.
+ */
 export function searchingGift() {
-  const id = `pg${++uid}`;
-  const rays = Array.from({ length: 10 }, (_, i) => {
-    const a = (i / 10) * Math.PI * 2;
-    const x1 = 75 + Math.cos(a - 0.12) * 70;
-    const y1 = 62 + Math.sin(a - 0.12) * 70;
-    const x2 = 75 + Math.cos(a + 0.12) * 70;
-    const y2 = 62 + Math.sin(a + 0.12) * 70;
-    return `<path d="M75 62L${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}Z" fill="url(#g${id})" opacity=".45"/>`;
-  }).join('');
-  return h('div', { class: 'searching__gift', html: `<svg viewBox="0 0 150 150" width="100%" height="100%" aria-hidden="true">${defs(id)}
-    <g class="g-rays">${rays}</g>
-    <g class="g-box">
-      <rect x="25" y="72" width="100" height="70" rx="17" fill="url(#r${id})"/>
-      <rect x="25" y="78" width="100" height="6" fill="#2B1846" opacity=".13"/>
-      <rect x="67" y="72" width="16" height="70" fill="#FFF4E8"/>
-      <g class="g-lid">
-        <rect x="15" y="52" width="120" height="26" rx="12" fill="url(#l${id})"/>
-        <rect x="67" y="52" width="16" height="26" fill="#FFF4E8"/>
-        <path d="${STAR(75, 31, 20)}" fill="url(#g${id})"/>
-      </g>
+  return h('div', { class: 'wrap-anim', html: `<svg viewBox="0 0 160 160" width="100%" height="100%" aria-hidden="true">
+    <ellipse class="w-shadow" cx="80" cy="146" rx="52" ry="6"/>
+    <g class="w-box">
+      <rect class="w-body" x="30" y="66" width="100" height="72" rx="10"/>
+      <line class="w-rib w-rib--h" x1="30" y1="102" x2="130" y2="102"/>
+      <line class="w-rib w-rib--v" x1="80" y1="66" x2="80" y2="138"/>
+    </g>
+    <g class="w-lid">
+      <rect class="w-lidbox" x="24" y="52" width="112" height="20" rx="6"/>
+      <line class="w-rib w-rib--l" x1="80" y1="52" x2="80" y2="72"/>
+    </g>
+    <g class="w-bow">
+      <path d="M80 52c-8.1-8.1-29.3-15.8-35.1-8.1-5.8 8.1 5.8 17.4 35.1 8.1Z"/>
+      <path d="M80 52c8.1-8.1 29.3-15.8 35.1-8.1 5.8 8.1-5.8 17.4-35.1 8.1Z"/>
+      <rect x="74" y="46.5" width="12" height="11" rx="4"/>
     </g>
   </svg>` });
 }
 
-/** Petite boîte vide pour les états sans contenu. */
+/** Petite boîte entrouverte pour les états sans contenu. */
 export function emptyGift() {
-  const id = `pg${++uid}`;
-  return h('div', { class: 'empty__art float', html: `<svg viewBox="0 0 120 120" aria-hidden="true">${defs(id)}
-    <ellipse cx="60" cy="108" rx="34" ry="5" fill="#2B1846" opacity=".1"/>
-    <rect x="24" y="52" width="72" height="50" rx="14" fill="url(#r${id})" opacity=".9"/>
+  return h('div', { class: 'empty__art', html: `<svg viewBox="0 0 120 120" aria-hidden="true">
+    <ellipse cx="60" cy="108" rx="34" ry="5" fill="#2B1846" fill-opacity=".08"/>
+    <rect x="24" y="52" width="72" height="50" rx="11" fill="#E9483A"/>
     <rect x="54" y="52" width="12" height="50" fill="#FFF4E8"/>
-    <g transform="rotate(-16 22 46)"><rect x="16" y="34" width="88" height="20" rx="10" fill="url(#l${id})"/><rect x="54" y="34" width="12" height="20" fill="#FFF4E8"/></g>
-    <path d="${STAR(88, 20, 9)}" fill="url(#g${id})"/>
+    <g transform="rotate(-14 20 46)"><rect x="16" y="34" width="88" height="18" rx="7" fill="#C93A2E"/><rect x="54" y="34" width="12" height="18" fill="#FFF4E8"/></g>
   </svg>` });
+}
+
+/** Étiquette cadeau de l'accueil : « À : … / De : moi », suspendue à sa ficelle. */
+export function giftTag(input) {
+  return h('div', { class: 'tag' },
+    h('span', { class: 'tag__string', html: '<svg viewBox="0 0 50 30" aria-hidden="true"><path d="M48 30C36 26 30 8 2 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' }),
+    h('div', { class: 'tag__card' },
+      h('span', { class: 'tag__hole' }),
+      h('label', { class: 'tag__row' }, h('span', { class: 'tag__key' }, 'À'), input),
+      h('div', { class: 'tag__row tag__row--from' }, h('span', { class: 'tag__key' }, 'De'), h('span', { class: 'tag__from' }, 'moi')),
+    ),
+  );
 }

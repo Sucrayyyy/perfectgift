@@ -9,6 +9,7 @@ import { SearchingScreen } from './ui/screens/searching.js';
 import { ResultsScreen } from './ui/screens/results.js';
 import { FavoritesScreen } from './ui/screens/favorites.js';
 import { HistoryScreen } from './ui/screens/historyScreen.js';
+import { PeopleScreen } from './ui/screens/people.js';
 
 applyTheme(theme.get());
 mountTabbar(document.getElementById('tabbar'));
@@ -20,6 +21,7 @@ route('/search', () => SearchingScreen());
 route('/results/:id', (params) => ResultsScreen(params));
 route('/favorites', () => FavoritesScreen());
 route('/history', () => HistoryScreen());
+route('/people', () => PeopleScreen());
 
 start();
 

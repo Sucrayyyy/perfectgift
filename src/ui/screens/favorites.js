@@ -2,12 +2,13 @@
 import { h, formatRange } from '../../core/dom.js';
 import { icon, iconSvg } from '../../core/icons.js';
 import { animate, collapse, stagger, pop, RISE } from '../../core/motion.js';
-import { favorites } from '../../core/store.js';
+import { favorites, history, people } from '../../core/store.js';
 import { GIFT_TYPES } from '../../domain/options.js';
 import { merchantRow, MODE_META } from '../components/giftCard.js';
 import { openSheet, toast } from '../components/overlay.js';
 import { emptyGift } from '../components/brand.js';
 import { giftArt } from '../components/art.js';
+import { shareContent } from '../components/share.js';
 
 const ORIGINALITY = ['', 'Classique', 'Sûr', 'Original', 'Audacieux', 'Inattendu'];
 const priceText = (f) => (f.verified ? `${formatRange(f.price)}` : `≈ ${formatRange(f.price)}`);
@@ -18,7 +19,7 @@ function openFavorite(f) {
     body: h('div', { class: 'stack' },
       h('p', { class: 'muted' }, f.d),
       h('div', { class: 'why', style: { '--m': `var(--${f.mode})`, '--m-soft': `var(--${f.mode}-soft)` } },
-        h('div', { class: 'why__label' }, icon('star4'), 'Pourquoi ce cadeau ?'), h('p', null, f.why)),
+        h('div', { class: 'why__label' }, icon('tag'), 'Pourquoi ce cadeau ?'), h('p', null, f.why)),
       h('div', { class: 'row' }, h('span', { class: 'gcard__amount' }, priceText(f)),
         h('span', { class: f.verified ? 'pill pill--ok' : 'pill pill--demo' }, f.verified ? 'Prix vérifié' : 'Prix indicatif')),
       h('div', null, f.links.map((l) => merchantRow({ ...l, merchant: l.name }))),
@@ -61,9 +62,27 @@ export function FavoritesScreen() {
       h('span', { class: 'eyebrow' }, 'Vos coups de cœur'),
       h('div', { class: 'row row--between' },
         h('h1', { class: 'display' }, 'Favoris'),
-        n >= 2 ? h('button', { type: 'button', class: ['btn btn--sm', selecting ? 'btn--dark' : 'btn--soft'], onclick: toggleSelect }, icon('columns'), selecting ? 'Terminer' : 'Comparer') : null),
+        h('div', { class: 'row', style: { gap: '8px' } },
+          n ? h('button', { type: 'button', class: 'btn btn--icon btn--sm', 'aria-label': 'Partager ma liste', onclick: shareList }, icon('share')) : null,
+          n >= 2 ? h('button', { type: 'button', class: ['btn btn--sm', selecting ? 'btn--dark' : 'btn--soft'], onclick: toggleSelect }, icon('columns'), selecting ? 'Terminer' : 'Comparer') : null)),
       h('p', { class: 'muted' }, n ? `${n} idée${n > 1 ? 's' : ''} sauvegardée${n > 1 ? 's' : ''}${selecting ? ' · touchez pour sélectionner (3 max)' : ''}` : ''),
     );
+  }
+
+  function shareList() {
+    const lines = favorites.all().map((f) => `• ${f.t} (≈ ${formatRange(f.price)})${f.offered ? ' : offert' : ''}`);
+    shareContent({ title: 'Mes idées cadeaux', text: ['Mes idées cadeaux :', ...lines].join('\n') });
+  }
+
+  /** « Offert » : la personne liée à la recherche ne se verra plus proposer cette idée. */
+  function toggleOffered(f) {
+    const on = !f.offered;
+    favorites.patch(f.id, { offered: on });
+    const personId = f.searchId ? history.get(f.searchId)?.personId : null;
+    if (personId) people.setGiven(personId, f, on);
+    const who = personId ? people.get(personId)?.name : null;
+    toast(on ? (who ? `Noté : offert à ${who}` : 'Marqué comme offert') : 'Plus marqué comme offert');
+    render();
   }
 
   function toggleSelect() {
@@ -106,13 +125,21 @@ export function FavoritesScreen() {
       render();
       toast('Retiré des favoris', { action: 'Annuler', onAction: () => { favorites.toggle(f); render(); } });
     });
+    const offered = h('button', {
+      type: 'button', class: ['btn btn--plain-icon litem__offered', f.offered && 'is-on'],
+      'aria-label': f.offered ? 'Ne plus marquer comme offert' : 'Marquer comme offert', 'aria-pressed': String(!!f.offered),
+      style: { position: 'relative', zIndex: 1 },
+    }, icon('offered'));
+    offered.addEventListener('click', () => toggleOffered(f));
+    card.classList.toggle('is-offered', !!f.offered);
     card.append(
       h('span', { class: 'litem__art', style: { '--a': f.hue[0], '--b': f.hue[1] }, html: iconSvg(f.ic || 'gift', 1.6) }),
       h('span', { class: 'litem__body' },
         h('span', { class: 'litem__title', style: { display: 'block' } }, f.t),
-        h('span', { class: 'litem__meta' }, h('b', null, priceText(f)), h('span', null, GIFT_TYPES[f.y].l), h('span', null, `${f.relevance} % pertinent`)),
+        h('span', { class: 'litem__meta' }, h('b', null, priceText(f)), h('span', null, GIFT_TYPES[f.y].l),
+          f.offered ? h('span', { class: 'litem__badge' }, 'Offert') : h('span', null, `${f.relevance} % pertinent`)),
       ),
-      h('span', { class: 'litem__actions' }, selecting ? h('span', { class: 'litem__select', html: iconSvg('check') }) : remove),
+      h('span', { class: 'litem__actions' }, selecting ? h('span', { class: 'litem__select', html: iconSvg('check') }) : [offered, remove]),
       open,
     );
     return card;
@@ -126,7 +153,7 @@ export function FavoritesScreen() {
       listEl.replaceChildren(h('div', { class: 'empty' }, emptyGift(),
         h('div', { class: 'empty__title' }, 'Pas encore de favoris'),
         h('p', { class: 'muted' }, 'Touchez le cœur sur une idée pour la retrouver ici.'),
-        h('a', { class: 'btn btn--primary', href: '#/' }, icon('star4'), 'Trouver un cadeau')));
+        h('a', { class: 'btn btn--primary', href: '#/' }, 'Trouver un cadeau', icon('arrow-right'))));
     } else {
       listEl.replaceChildren(...list.map(item));
       if (animateIn) stagger(listEl.children, RISE, { step: 50 });

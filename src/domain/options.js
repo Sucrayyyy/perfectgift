@@ -52,7 +52,7 @@ export const OCCASIONS = [
   { v: 'cremaillere', icon: 'home', l: 'Crémaillère', phrase: 'une crémaillère', when: isAdult },
   { v: 'reussite', icon: 'graduation', l: 'Diplôme / réussite', phrase: 'une réussite à fêter', when: (a) => !isBaby(a) },
   { v: 'merci', icon: 'smile', l: 'Remerciement', phrase: 'un remerciement' },
-  { v: 'surprise', icon: 'sparkles', l: 'Sans occasion', phrase: 'une surprise sans raison' },
+  { v: 'surprise', icon: 'gift', l: 'Sans occasion', phrase: 'une surprise sans raison' },
 ];
 
 export const TONES = [
@@ -155,7 +155,7 @@ export function emptyAnswers() {
     disliked: '',
     avoid: [],
     story: '',
-    budget: { preset: null, min: null, max: null, allowOver: false },
+    budget: { preset: null, min: null, max: null, allowOver: false, participants: 1 },
     modes: ['perfect'],
   };
 }

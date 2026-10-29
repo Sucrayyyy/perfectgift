@@ -95,33 +95,6 @@ export function burst(el, { colors = ['#E9483A', '#F2B544', '#FF8A5B', '#C2285F'
   }
 }
 
-/** Pluie de confettis aux couleurs de la marque (arrivée des résultats). */
-export function confetti({ count = 46, origin = { x: 0.5, y: 0.28 } } = {}) {
-  if (reducedMotion()) return;
-  const colors = ['#E9483A', '#F2B544', '#FF8A5B', '#C2285F', '#6A48F5', '#1C8A6E'];
-  const W = innerWidth;
-  const H = innerHeight;
-  for (let i = 0; i < count; i++) {
-    const c = document.createElement('span');
-    const size = 6 + Math.random() * 6;
-    Object.assign(c.style, {
-      position: 'fixed', left: `${origin.x * W}px`, top: `${origin.y * H}px`, zIndex: 90, pointerEvents: 'none',
-      width: `${size}px`, height: `${size * (Math.random() > 0.5 ? 1.6 : 1)}px`,
-      borderRadius: Math.random() > 0.6 ? '50%' : '2px', background: colors[i % colors.length],
-    });
-    document.body.append(c);
-    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
-    const v = 160 + Math.random() * 220;
-    const dx = Math.cos(angle) * v;
-    const dy = Math.sin(angle) * v;
-    c.animate([
-      { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
-      { transform: `translate(${dx}px, ${dy}px) rotate(${Math.random() * 360}deg)`, opacity: 1, offset: 0.45 },
-      { transform: `translate(${dx * 1.3}px, ${dy + H * 0.55}px) rotate(${Math.random() * 720}deg)`, opacity: 0 },
-    ], { duration: 1600 + Math.random() * 900, easing: 'cubic-bezier(.2,.6,.4,1)', fill: 'forwards' }).finished.finally(() => c.remove());
-  }
-}
-
 /** Replie un élément (hauteur → 0) avant de le retirer : les voisins glissent naturellement. */
 export async function collapse(el, { direction = 1 } = {}) {
   if (!el) return;

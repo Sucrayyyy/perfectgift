@@ -7,6 +7,7 @@ import { buildProfile } from '../src/domain/profile.js';
 import { recommend } from '../src/domain/engine.js';
 import { DEMO_CATALOG } from '../src/data/catalog.demo.js';
 import { searchLinks, MERCHANTS } from '../src/data/merchants.js';
+import { easter, mothersDay, fathersDay, nextAnnual, upcomingEvents, buildIcs, parseBirthday } from '../src/domain/calendar.js';
 
 const answers = (over = {}) => {
   const a = { ...emptyAnswers(), ageBand: '26-40', relation: 'ami', closeness: 3, occasion: 'anniversaire', budget: { preset: '50-100', allowOver: false }, ...over };
@@ -177,5 +178,39 @@ describe('Liens marchands', () => {
       expect(l.type).toBe('search');
       expect(l.url).toContain(encodeURIComponent(idea.q));
     }
+  });
+});
+
+describe('Calendrier des occasions', () => {
+  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  it('calcule Pâques', () => {
+    expect(ymd(easter(2026))).toBe('2026-04-05');
+    expect(ymd(easter(2024))).toBe('2024-03-31');
+  });
+  it('calcule la fête des Mères française, y compris quand elle tombe à la Pentecôte', () => {
+    expect(ymd(mothersDay(2026))).toBe('2026-05-31');
+    expect(ymd(mothersDay(2024))).toBe('2024-05-26');
+    expect(ymd(mothersDay(2004))).toBe('2004-06-06');
+  });
+  it('calcule la fête des Pères (3e dimanche de juin)', () => {
+    expect(ymd(fathersDay(2026))).toBe('2026-06-21');
+  });
+  it('gère le 29 février et le passage d’année', () => {
+    expect(ymd(nextAnnual(2, 29, new Date(2026, 9, 29)))).toBe('2027-02-28');
+    expect(ymd(nextAnnual(3, 12, new Date(2026, 9, 29)))).toBe('2027-03-12');
+    expect(parseBirthday('1992-11-10')).toEqual({ month: 11, day: 10 });
+  });
+  it('liste les occasions à venir, les proches en premier', () => {
+    const today = new Date(2026, 9, 29);
+    const events = upcomingEvents([{ id: 'p1', name: 'Léa', birthday: '1994-11-10' }], today, 60);
+    expect(events[0].label).toBe('Anniversaire de Léa');
+    expect(events[0].days).toBe(12);
+    expect(events.map((e) => e.id)).toContain('noel');
+  });
+  it('produit un rappel annuel avec alerte', () => {
+    const ics = buildIcs({ uid: 'p1', title: 'Anniversaire de Léa', month: 11, day: 10, today: new Date(2026, 9, 29) });
+    expect(ics).toContain('RRULE:FREQ=YEARLY');
+    expect(ics).toContain('DTSTART;VALUE=DATE:20261110');
+    expect(ics).toContain('TRIGGER:-P7D');
   });
 });

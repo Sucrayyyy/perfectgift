@@ -6,6 +6,7 @@ import { favorites } from '../../core/store.js';
 import { GIFT_TYPES } from '../../domain/options.js';
 import { purchaseLinks, DATA_MODE } from '../../services/recommendations.js';
 import { openSheet, toast } from './overlay.js';
+import { shareContent } from './share.js';
 import { giftArt, ideaIcon, hueFor } from './art.js';
 
 export const MODE_META = {
@@ -36,13 +37,20 @@ export function snapshot(c, searchId) {
   };
 }
 
-function priceBlock(c) {
+function perPerson(range, participants) {
+  if (!participants || participants < 2) return null;
+  const [a, b] = range.map((v) => Math.max(1, Math.round(v / participants)));
+  return h('span', { class: 'subtle' }, a === b ? `soit ≈ ${a}\u00a0€ chacun` : `soit ≈ ${a}–${b}\u00a0€ chacun`);
+}
+
+function priceBlock(c, participants) {
   const offer = c.offers?.[0];
   if (offer) {
     return h('div', { class: 'gcard__price' },
       h('span', { class: 'gcard__amount' }, formatPrice(offer.price)),
       h('span', { class: 'pill pill--ok' }, icon('check'), 'Prix vérifié'),
       h('span', { class: 'subtle' }, `chez ${offer.merchant}`),
+      perPerson([offer.price, offer.price], participants),
     );
   }
   return h('div', { class: 'gcard__price' },
@@ -51,10 +59,11 @@ function priceBlock(c) {
       ? h('span', { class: 'pill pill--demo' }, 'Hors budget')
       : h('span', { class: 'pill pill--demo', title: 'Fourchette indicative, non vérifiée en temps réel' }, 'Prix indicatif'),
     c.price.clipped ? h('span', { class: 'subtle' }, 'versions dans votre budget') : null,
+    perPerson(c.price.range, participants),
   );
 }
 
-export function giftCard(c, { searchId, rank, onReject }) {
+export function giftCard(c, { searchId, rank, onReject, participants = 1, showMode = true }) {
   const { idea } = c;
   const [a, b, cc] = hueFor(idea);
   const type = GIFT_TYPES[idea.y];
@@ -90,7 +99,7 @@ export function giftCard(c, { searchId, rank, onReject }) {
         : giftArt(ideaIcon(idea)),
       h('div', { class: 'gcard__badges' },
         h('span', { class: 'pill pill--glass' }, icon(type.icon), type.l),
-        h('span', { class: `pill pill--${c.mode}` }, MODE_META[c.mode].name),
+        showMode ? h('span', { class: `pill pill--${c.mode}` }, MODE_META[c.mode].name) : null,
       ),
       favBtn,
       rank ? h('span', { class: 'gcard__rank' }, `N° ${rank}`) : null,
@@ -99,10 +108,10 @@ export function giftCard(c, { searchId, rank, onReject }) {
     h('div', { class: 'gcard__body' },
       merchants.length ? h('div', { class: 'gcard__meta' }, ...merchants.flatMap((m, i) => (i ? [h('span', { class: 'sep' }), m] : [m]))) : null,
       h('h3', { class: 'gcard__title' }, offer?.title || idea.t),
-      priceBlock(c),
+      priceBlock(c, participants),
       h('p', { class: 'gcard__desc' }, frenchSpacing(idea.d)),
       h('div', { class: 'why' },
-        h('div', { class: 'why__label' }, icon('star4'), 'Pourquoi ce cadeau ?'),
+        h('div', { class: 'why__label' }, icon('tag'), 'Pourquoi ce cadeau ?'),
         h('p', null, frenchSpacing(c.why)),
       ),
       h('div', { class: 'scores' },
@@ -153,7 +162,12 @@ export function openWhere(c, extraNotes = []) {
       ? 'Certains liens sont des liens partenaires : PerfectGift peut percevoir une commission, sans surcoût pour vous.'
       : 'Liens non affiliés : PerfectGift ne perçoit aucune commission.'),
   );
-  openSheet({ title: c.idea.t, body });
+  const shareBtn = h('button', { type: 'button', class: 'btn btn--soft btn--block' }, icon('share'), 'Partager cette idée');
+  shareBtn.addEventListener('click', () => shareContent({
+    title: c.idea.t,
+    text: `Idée cadeau : ${c.idea.t} (≈ ${formatRange(c.price.range)}). ${c.why}`,
+  }));
+  openSheet({ title: c.idea.t, body, footer: shareBtn });
 }
 
 export function merchantRow(l) {

@@ -47,10 +47,9 @@ export function hueFor(idea) {
   return INTEREST_BY_ID[idea.i?.[0]]?.hue || GENERIC_HUE;
 }
 
-/** Visuel d'une idée : paquet coloré + objet dessiné au centre. */
+/** Visuel d'une idée : paquet coloré, objet dessiné au centre du nœud. */
 export function giftArt(iconName, { size = 'lg' } = {}) {
   return h('span', { class: ['art-badge', `art-badge--${size}`] },
     h('span', { class: 'art-badge__icon', html: iconSvg(iconName, 1.5) }),
-    h('span', { class: 'art-badge__star', html: iconSvg('star4') }),
   );
 }

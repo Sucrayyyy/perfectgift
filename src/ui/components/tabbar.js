@@ -7,6 +7,7 @@ import { onRoute } from '../../core/router.js';
 
 const TABS = [
   { id: 'home', href: '#/', label: 'Accueil', icon: 'gift' },
+  { id: 'people', href: '#/people', label: 'Proches', icon: 'users' },
   { id: 'favorites', href: '#/favorites', label: 'Favoris', icon: 'heart' },
   { id: 'history', href: '#/history', label: 'Historique', icon: 'history' },
 ];

@@ -46,7 +46,7 @@ export function HistoryScreen() {
       ),
       h('div', { class: 'hist__actions' },
         h('button', { type: 'button', class: 'btn btn--dark btn--sm', onclick: () => navigate(`/results/${s.id}`) }, icon('gift'), 'Voir les idées'),
-        h('button', { type: 'button', class: 'btn btn--soft btn--sm', onclick: () => { draft.set({ answers: a, stepId: 'who' }); navigate('/quiz'); } }, icon('edit'), 'Modifier'),
+        h('button', { type: 'button', class: 'btn btn--soft btn--sm', onclick: () => { draft.set({ answers: a, stepId: 'who', personId: s.personId || null }); navigate('/quiz'); } }, icon('edit'), 'Modifier'),
       ),
     );
     return node;
@@ -58,7 +58,7 @@ export function HistoryScreen() {
       listEl.replaceChildren(h('div', { class: 'empty' }, emptyGift(),
         h('div', { class: 'empty__title' }, 'Aucune recherche pour l’instant'),
         h('p', { class: 'muted' }, 'Vos recherches apparaîtront ici, avec leurs réponses et leurs idées.'),
-        h('a', { class: 'btn btn--primary', href: '#/' }, icon('star4'), 'Commencer')));
+        h('a', { class: 'btn btn--primary', href: '#/' }, 'Trouver un cadeau', icon('arrow-right'))));
       return;
     }
     listEl.replaceChildren(...list.map(card));

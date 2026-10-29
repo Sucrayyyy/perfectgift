@@ -1,8 +1,8 @@
 // Résultats : sections, tri, filtres, cartes animées, relance sans refaire le questionnaire, retour utilisateur.
-import { h, formatPrice } from '../../core/dom.js';
+import { h, formatPrice, formatRange } from '../../core/dom.js';
 import { icon } from '../../core/icons.js';
-import { animate, collapse, confetti, revealOnScroll, stagger, RISE } from '../../core/motion.js';
-import { history, feedback, draft } from '../../core/store.js';
+import { animate, collapse, revealOnScroll, stagger, RISE } from '../../core/motion.js';
+import { history, feedback, draft, people, uid } from '../../core/store.js';
 import { navigate, back } from '../../core/router.js';
 import { OCCASIONS, RELATIONS, GIFT_TYPES, BUDGETS } from '../../domain/options.js';
 import { INTEREST_BY_ID } from '../../domain/interests.js';
@@ -10,6 +10,7 @@ import { DATA_MODE, getRecommendations, purchaseLinks } from '../../services/rec
 import { giftCard, demoInfo, MODE_META } from '../components/giftCard.js';
 import { openSheet, toast } from '../components/overlay.js';
 import { searchingGift, emptyGift } from '../components/brand.js';
+import { shareContent } from '../components/share.js';
 
 const SECTIONS = [
   { id: 'best', l: 'Meilleur choix' },
@@ -33,7 +34,7 @@ const SORTS = [
 
 const REFINE = [
   { id: 'more', icon: 'refresh', l: 'Trouve-moi d’autres idées', sub: 'Une nouvelle sélection, sans les idées actuelles', done: 'Voici une nouvelle sélection' },
-  { id: 'original', icon: 'sparkles', l: 'Sois plus original', sub: 'Plus de surprises, moins d’évidences', done: 'On ose davantage' },
+  { id: 'original', icon: 'shuffle', l: 'Sois plus original', sub: 'Plus de surprises, moins d’évidences', done: 'On ose davantage' },
   { id: 'cheaper', icon: 'euro', l: 'Reste dans un budget inférieur', sub: 'Plafond abaissé d’environ un tiers', done: 'Budget revu à la baisse' },
   { id: 'personal', icon: 'heart', l: 'Propose-moi quelque chose de plus personnel', sub: 'Personnalisé, sentimental, unique', done: 'Des idées plus personnelles', toggle: 'personal' },
   { id: 'immaterial', icon: 'ticket', l: 'Évite les objets matériels', sub: 'Expériences, ateliers et abonnements', done: 'Plus aucun objet matériel', toggle: 'noMaterial' },
@@ -84,8 +85,12 @@ export function ResultsScreen({ id }) {
   const topbar = h('header', { class: 'topbar' },
     h('button', { type: 'button', class: 'btn btn--icon', 'aria-label': 'Retour', onclick: () => back('/') }, icon('arrow-left')),
     topTitle,
-    h('button', { type: 'button', class: 'btn btn--icon', 'aria-label': 'Modifier les réponses', onclick: editAnswers }, icon('edit')),
+    h('div', { class: 'row', style: { gap: '8px' } },
+      h('button', { type: 'button', class: 'btn btn--icon', 'aria-label': 'Partager la sélection', onclick: shareSelection }, icon('share')),
+      h('button', { type: 'button', class: 'btn btn--icon', 'aria-label': 'Modifier les réponses', onclick: editAnswers }, icon('edit')),
+    ),
   );
+  const personSlot = h('div');
   const hero = h('div', { class: 'results__hero' });
   const seg = h('div', { class: 'seg', role: 'tablist' });
   const segWrap = h('div', { class: 'seg-wrap' }, seg);
@@ -104,11 +109,17 @@ export function ResultsScreen({ id }) {
   const rate = h('section', { class: 'rate' });
   const fab = h('button', { type: 'button', class: 'fab is-hidden', onclick: openRefine }, icon('wand'), 'Affiner');
 
-  const el = h('section', { class: 'screen results' }, topbar, hero, segWrap, toolbar, list, refinePanel, rate);
+  const el = h('section', { class: 'screen results' }, topbar, hero, personSlot, segWrap, toolbar, list, refinePanel, rate);
 
   // ---------- Données ----------
   async function load() {
-    state.data = await getRecommendations(search.answers, search.adjustments);
+    // Les cadeaux déjà offerts à ce proche ne sont jamais reproposés
+    const person = search.personId ? people.get(search.personId) : null;
+    const given = (person?.given || []).map((g) => g.id);
+    state.data = await getRecommendations(search.answers, {
+      ...search.adjustments,
+      excluded: [...(search.adjustments.excluded || []), ...given],
+    });
     state.dismissed = new Set();
     renderAll();
   }
@@ -168,8 +179,9 @@ export function ResultsScreen({ id }) {
   // ---------- Rendu ----------
   function renderAll() {
     renderHero();
+    renderPerson();
     renderSeg();
-    renderList({ celebrate: firstLoad });
+    renderList();
     renderRefine();
     renderRate();
     firstLoad = false;
@@ -184,6 +196,7 @@ export function ResultsScreen({ id }) {
     const budgetLabel = preset && preset.v !== 'custom' && (search.adjustments.budgetFactor || 1) === 1
       ? preset.l
       : `${result.budget[0]} – ${formatPrice(result.budget[1])}`;
+    const participants = a.budget?.participants || 1;
     topTitle.textContent = profile.name ? `Pour ${profile.name}` : 'Vos idées';
     hero.replaceChildren(...[
       h('span', { class: 'eyebrow' }, `${result.best.length} idées sur-mesure`),
@@ -192,6 +205,7 @@ export function ResultsScreen({ id }) {
         occ ? h('span', { class: 'pill' }, icon(occ.icon), occ.l) : null,
         rel ? h('span', { class: 'pill' }, rel.l) : null,
         h('span', { class: 'pill' }, budgetLabel),
+        participants > 1 ? h('span', { class: 'pill' }, icon('users'), `À ${participants}`) : null,
         ...['safe', 'perfect', 'extra'].filter((m) => profile.modes.has(m)).map((m) => h('span', { class: `pill pill--${m}` }, MODE_META[m].name)),
         mode === 'live'
           ? h('span', { class: 'pill pill--ok' }, icon('check'), 'Offres vérifiées')
@@ -237,7 +251,7 @@ export function ResultsScreen({ id }) {
     if (instant) requestAnimationFrame(() => (ink.style.transition = ''));
   }
 
-  function renderList({ celebrate = false } = {}) {
+  function renderList() {
     disconnect();
     const gs = groups();
     const total = gs.reduce((n, g) => n + g.items.length, 0);
@@ -266,7 +280,7 @@ export function ResultsScreen({ id }) {
       }
       for (const c of g.items) {
         rank++;
-        const card = giftCard(c, { searchId: id, rank: state.section === 'best' && state.sort === 'best' && rank <= 3 ? rank : null, onReject: reject });
+        const card = giftCard(c, { searchId: id, rank: state.section === 'best' && state.sort === 'best' && rank <= 3 ? rank : null, onReject: reject, participants: search.answers.budget?.participants || 1, showMode: state.data.profile.modes.size > 1 });
         cards.push(card);
         children.push(card);
       }
@@ -279,7 +293,6 @@ export function ResultsScreen({ id }) {
       delay = Math.min(delay + 90, 270);
       setTimeout(() => (delay = 0), 400);
     });
-    if (celebrate) setTimeout(() => confetti({ count: 36, origin: { x: 0.5, y: 0.15 } }), 250);
   }
 
   function emptyState() {
@@ -386,7 +399,7 @@ export function ResultsScreen({ id }) {
     document.getElementById('layer').append(overlay);
     animate(overlay, [{ opacity: 0 }, { opacity: 1 }], { duration: 240 });
     await Promise.all([load(), sleep(1100)]);
-    gift.classList.add('is-open');
+    gift.classList.add('is-done');
     await sleep(380);
     await animate(overlay, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, keep: true });
     overlay.remove();
@@ -396,8 +409,64 @@ export function ResultsScreen({ id }) {
   }
 
   function editAnswers() {
-    draft.set({ answers: search.answers, stepId: 'budget', updatedAt: new Date().toISOString() });
+    draft.set({ answers: search.answers, stepId: 'budget', personId: search.personId || null, updatedAt: new Date().toISOString() });
     navigate('/quiz');
+  }
+
+  /** Partage de la sélection : pratique pour un cadeau à plusieurs. */
+  function shareSelection() {
+    const { profile, result } = state.data;
+    const n = search.answers.budget?.participants || 1;
+    const occ = OCCASIONS.find((o) => o.v === search.answers.occasion);
+    const lines = result.best.filter((c) => !state.dismissed.has(c.idea.id)).slice(0, 8)
+      .map((c, i) => `${i + 1}. ${c.idea.t} (≈ ${formatRange(c.price.range)})`);
+    const who = profile.name || 'cette personne';
+    shareContent({
+      title: `Idées cadeaux pour ${who}`,
+      text: [`Idées cadeaux pour ${who}${occ ? ` (${occ.l.toLowerCase()})` : ''}${n > 1 ? `, à ${n}` : ''} :`, ...lines].join('\n'),
+    });
+  }
+
+  /** Proche : proposer d'enregistrer la personne pour les prochaines occasions. */
+  function renderPerson() {
+    const person = search.personId ? people.get(search.personId) : null;
+    if (person) {
+      personSlot.replaceChildren(h('a', { class: 'person-link', href: '#/people' }, icon('users'), `${person.name} est dans vos proches`, icon('chevron-right')));
+      return;
+    }
+    const name = search.answers.name?.trim();
+    const save = h('button', { type: 'button', class: 'btn btn--dark btn--sm', onclick: openSavePerson }, 'Enregistrer');
+    personSlot.replaceChildren(h('div', { class: 'save-person' },
+      h('span', { class: 'save-person__icon' }, icon('users')),
+      h('span', { class: 'grow' },
+        h('b', null, name ? `Garder ${name} dans vos proches` : 'Garder cette personne dans vos proches'),
+        h('span', null, 'Ses goûts restent enregistrés, et on vous rappelle ses occasions.')),
+      save,
+    ));
+  }
+
+  function openSavePerson() {
+    const nameIn = h('input', { class: 'input', type: 'text', placeholder: 'Prénom', maxlength: 30, value: search.answers.name || '' });
+    const dateIn = h('input', { class: 'input', type: 'date' });
+    const saveBtn = h('button', { type: 'button', class: 'btn btn--primary grow' }, 'Enregistrer');
+    const sheet = openSheet({
+      title: 'Ajouter à vos proches',
+      body: h('div', { class: 'stack' },
+        h('label', { class: 'field' }, h('span', { class: 'field__label' }, 'Prénom'), nameIn),
+        h('label', { class: 'field' }, h('span', { class: 'field__label' }, 'Date d’anniversaire', h('span', { class: 'opt' }, 'facultatif')), dateIn),
+      ),
+      footer: saveBtn,
+    });
+    saveBtn.addEventListener('click', () => {
+      const name = nameIn.value.trim();
+      if (!name) return nameIn.focus();
+      const person = people.save({ id: uid('p'), name, birthday: dateIn.value || null, answers: { ...search.answers, name } });
+      search = history.update(id, { personId: person.id, answers: { ...search.answers, name } });
+      sheet.close();
+      renderPerson();
+      renderHero();
+      toast(`${name} est dans vos proches`);
+    });
   }
 
   function openFilters() {

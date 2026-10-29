@@ -16,17 +16,21 @@ Application mobile (PWA) qui trouve le cadeau idéal à partir d'un questionnair
 
 | Fonctionnalité | État |
 |---|---|
-| Accueil animé, identité visuelle, thème clair / sombre | ✅ |
-| Questionnaire dynamique (14 étapes max, questions conditionnelles, 19 passions approfondies, passions libres) | ✅ |
-| Budget (6 tranches + personnalisé min/max, option hors budget) | ✅ |
+| Accueil : une étiquette cadeau à remplir, les occasions qui approchent, vos proches | ✅ |
+| Questionnaire dynamique (questions conditionnelles, 19 passions approfondies, passions libres) | ✅ |
+| Budget (tranches ou sur mesure, option hors budget) et **cadeau à plusieurs** (part de chacun) | ✅ |
 | Modes SAFE / PERFECT / EXTRA, combinables (liste rangée du plus sûr au plus audacieux) | ✅ |
 | Moteur de recommandation (filtres, notation, diversité, gammes de prix, explications) | ✅ local |
 | Résultats : 9 sections, tri, 7 filtres, relance sans refaire le questionnaire, « ne convient pas » | ✅ |
-| Favoris + comparaison (2-3 idées), historique (rouvrir, modifier, supprimer) | ✅ sur l'appareil |
-| Retour utilisateur (pertinence, idées écartées) | ✅ stocké localement |
+| **Proches** : goûts mémorisés, date d'anniversaire, recherche express (on va droit au budget) | ✅ sur l'appareil |
+| **Calendrier** : anniversaires, Noël, fêtes des Mères et des Pères (dates françaises calculées) | ✅ |
+| **Rappels** : export .ics avec alerte 7 jours avant, pour Calendrier / Google Agenda | ✅ (non testé sur iPhone réel) |
+| **Cadeaux offerts** : marqués depuis les favoris, plus jamais reproposés à la même personne | ✅ |
+| **Partage** d'une idée, d'une sélection ou de sa liste (feuille de partage iOS) | ✅ |
+| Favoris + comparaison, historique, retour utilisateur | ✅ sur l'appareil |
 | Prix vérifiés, liens exacts, images, disponibilité | ⏳ nécessite le serveur + une source marchande |
 | Analyse IA du texte libre | ⏳ nécessite le serveur + une clé Claude |
-| Profils de personnes, calendrier, rappels, cadeaux de groupe | Phase 2 |
+| Notifications push, synchronisation entre appareils | ⏳ nécessite un serveur |
 
 ### Mode démo (par défaut)
 
@@ -95,6 +99,8 @@ Icônes et écrans de lancement : `swift scripts/render-icons.swift <svg> <png> 
 
 ## Direction artistique
 
-« Papier & Ruban » : papier crème, encre prune, ruban vermillon et étoile dorée. Le symbole est un cadeau dont le nœud est une étoile. Tout le visuel est dessiné pour l'app, sans emoji : un jeu d'icônes au trait (passions, occasions, types de cadeaux, objets) et des illustrations de cartes en forme de paquet, l'objet de l'idée au centre du nœud.
+« Papier & Ruban », en aplats : papier crème, encre prune, ruban vermillon, nœud doré, étiquette en papier kraft. Le symbole est un cadeau noué d'un vrai nœud de ruban. Volontairement aucun code visuel « IA » (étoiles scintillantes, halos, dégradés lumineux) : l'app doit ressembler à un objet fait main, pas à un générateur.
 
-Typographies : **Bricolage Grotesque** pour les titres (sérieuse mais pas austère) et **Figtree** pour le texte. Motion : entrées « déballage », ressorts doux sur les sélections, boîte qui tremble puis s'ouvre pendant la recherche, transitions de pages natives. Tout respecte le réglage iOS « Réduire les animations ».
+Tout le visuel est dessiné pour l'app, sans emoji : un jeu d'icônes au trait (passions, occasions, types de cadeaux, objets) et des illustrations de cartes en forme de paquet rayé, l'objet de l'idée au centre du nœud.
+
+Typographies : **Bricolage Grotesque** pour les titres, **Figtree** pour le texte. Motion : l'étiquette arrive en se balançant, les cartes se déballent, et pendant la recherche on emballe le cadeau (couvercle, ruban, nœud). Tout respecte le réglage iOS « Réduire les animations ».

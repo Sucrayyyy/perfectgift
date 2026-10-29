@@ -254,7 +254,8 @@ function interests(field, ctx) {
 
 function budget(field, ctx) {
   const amount = h('span', { class: 'budget__amount' });
-  const display = h('div', { class: 'budget__display' }, amount);
+  const per = h('span', { class: 'budget__per' });
+  const display = h('div', { class: 'budget__display' }, amount, per);
   const grid = h('div', { class: 'tiles' });
   const error = h('div', { class: 'budget__error', role: 'alert' });
   const minIn = h('input', { class: 'input', type: 'number', inputmode: 'numeric', min: 0, placeholder: '0' });
@@ -267,6 +268,24 @@ function budget(field, ctx) {
     h('span', { class: 'switch__text' }, 'Montrer aussi quelques idées hors budget', h('small', null, 'Toujours présentées à part, clairement signalées')),
     h('span', { class: 'switch__track' }, h('span', { class: 'switch__thumb' })),
   );
+
+  // Cadeau à plusieurs : le budget est un total partagé entre les participants
+  const count = h('span', { class: 'stepper__count', 'aria-live': 'polite' });
+  const minus = h('button', { type: 'button', class: 'btn btn--icon btn--sm', 'aria-label': 'Un participant de moins' }, icon('minus'));
+  const plus = h('button', { type: 'button', class: 'btn btn--icon btn--sm', 'aria-label': 'Un participant de plus' }, icon('plus'));
+  const groupHint = h('small');
+  const group = h('div', { class: 'stepper mt-16' },
+    h('span', { class: 'stepper__text' }, h('b', null, 'Cadeau à plusieurs ?'), groupHint),
+    h('span', { class: 'stepper__ctrl' }, minus, count, plus),
+  );
+  const setParticipants = (n) => {
+    ctx.set('budget', { ...b(), participants: Math.max(1, Math.min(30, n)) });
+    paint(false);
+    pop(count, 1.2);
+    ctx.changed({});
+  };
+  minus.addEventListener('click', () => setParticipants((b().participants || 1) - 1));
+  plus.addEventListener('click', () => setParticipants((b().participants || 1) + 1));
 
   const b = () => ctx.get('budget');
   const paint = (animateAmount) => {
@@ -281,6 +300,13 @@ function budget(field, ctx) {
     else if (cur.preset === '500+') amount.textContent = `${formatPrice(500)} +`;
     else amount.textContent = range[0] > 0 ? `${range[0]} – ${formatPrice(range[1])}` : `≤ ${formatPrice(range[1])}`;
     error.textContent = cur.preset === 'custom' && (minIn.value || maxIn.value) && !range ? 'Le minimum doit être inférieur au maximum.' : '';
+    const n = cur.participants || 1;
+    count.textContent = String(n);
+    minus.disabled = n <= 1;
+    groupHint.textContent = n > 1 ? `Budget total partagé entre ${n} personnes` : 'Ajoutez les participants pour répartir le budget';
+    per.textContent = n > 1 && range && cur.preset !== '500+'
+      ? `soit ${Math.round(range[0] / n)}–${Math.round(range[1] / n)}\u00a0€ chacun`
+      : n > 1 && range ? `soit dès ${Math.round(range[0] / n)}\u00a0€ chacun` : '';
     if (animateAmount) animate(amount, [{ transform: 'translateY(10px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 380, easing: EASE.spring });
   };
 
@@ -320,7 +346,7 @@ function budget(field, ctx) {
     ctx.changed({});
   });
   paint(false);
-  return h('div', { class: 'field' }, display, grid, custom, error, over);
+  return h('div', { class: 'field' }, display, grid, custom, error, group, over);
 }
 
 function modes(field, ctx) {
